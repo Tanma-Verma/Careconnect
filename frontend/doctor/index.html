@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CareConnect — Doctor portal</title>
+  <link rel="stylesheet" href="../shared/css/design.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="login" id="login" role="dialog" aria-labelledby="loginTitle">
+    <form class="login-box" id="loginForm" novalidate>
+      <div class="login-brand">
+        <div class="logo" aria-hidden="true">✚</div>
+        <div>
+          <div class="login-brand-title">CareConnect</div>
+          <span class="login-brand-sub">PRACTITIONER WORKSPACE</span>
+        </div>
+      </div>
+      <h1 id="loginTitle">Doctor sign in</h1>
+      <p>Sign in to manage your schedule and consented patient records.</p>
+      <div class="auth-error" id="loginError" role="alert"></div>
+      <label for="loginId">Email</label>
+      <input id="loginId" type="email" autocomplete="username" placeholder="Enter work email" required>
+      <label for="loginPass">Password</label>
+      <input id="loginPass" type="password" autocomplete="current-password" placeholder="Enter password" required>
+      <button class="primary" type="submit" id="loginSubmit">Sign in securely →</button>
+      <p class="demo-hint"><b>Stage 1</b><br>Uses the same secure API as the patient portal. Patient charts, uploads, and bookings are placeholders until later milestones.</p>
+      <button class="secondary full-width mt-10" type="button" id="showRegister">Create practitioner account</button>
+    </form>
+  </div>
+
+  <div class="modal-back" id="registerModal" hidden>
+    <form class="modal" id="registerForm" novalidate>
+      <h3>Create practitioner account</h3>
+      <p>Development-only self-registration. Passwords must be at least 12 characters.</p>
+      <div class="auth-error" id="registerError" role="alert"></div>
+      <div class="field">
+        <label for="regEmail">Work email</label>
+        <input id="regEmail" type="email" required>
+      </div>
+      <div class="field">
+        <label for="regPassword">Password</label>
+        <input id="regPassword" type="password" minlength="12" required>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" type="button" id="cancelRegister">Cancel</button>
+        <button class="primary" type="submit">Create account</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+  <div class="app" id="app" hidden>
+    <aside class="sidebar" id="sidebar" aria-label="Doctor workspace">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">✚</div>
+        <div>
+          <b>CareConnect</b>
+          <small>PRACTITIONER</small>
+        </div>
+      </div>
+      <div class="nav-label">WORKSPACE</div>
+      <nav class="nav" aria-label="Workspace">
+        <button type="button" class="active" data-page="dashboard" aria-current="page"><span class="ico" aria-hidden="true">▦</span> Today</button>
+        <button type="button" data-page="schedule"><span class="ico" aria-hidden="true">▣</span> Schedule</button>
+        <button type="button" data-page="patients"><span class="ico" aria-hidden="true">♙</span> Patients</button>
+        <button type="button" data-page="records"><span class="ico" aria-hidden="true">▤</span> Clinical notes</button>
+      </nav>
+      <div class="nav-label">ACCOUNT</div>
+      <nav class="nav" aria-label="Account">
+        <button type="button" data-page="audit"><span class="ico" aria-hidden="true">♧</span> Access log</button>
+        <button type="button" data-page="profile"><span class="ico" aria-hidden="true">◎</span> My profile</button>
+      </nav>
+      <div class="side-bottom">
+        <div class="help">
+          <b>Need help?</b>
+          <p>Clinic operations support will connect in a later release.</p>
+          <button type="button" id="supportBtn">Visit support centre</button>
+        </div>
+        <div class="profile-mini">
+          <div class="avatar" id="miniAvatar">—</div>
+          <div>
+            <b id="miniName">Signed in</b>
+            <small>Practitioner account</small>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main" id="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn mobile-menu" type="button" id="menuBtn" aria-label="Open menu">☰</button>
+          <div class="crumb">Workspace&nbsp; / &nbsp;<b id="crumb">Today</b></div>
+        </div>
+        <div class="top-actions">
+          <span class="sub" id="topDate"></span>
+          <div class="avatar" id="topAvatar">—</div>
+          <button class="secondary" type="button" id="logoutBtn">Log out</button>
+        </div>
+      </header>
+      <div class="content">
+        <section class="page active" id="dashboard">
+          <div class="welcome">
+            <div>
+              <div class="eyebrow">YOUR CLINIC DAY</div>
+              <h1 id="welcomeTitle">Welcome</h1>
+              <p>Review today’s schedule. Patient charts stay closed until consent APIs are live.</p>
+            </div>
+            <div class="date" id="welcomeDate"></div>
+          </div>
+          <div class="grid stats">
+            <div class="card"><div class="stat"><small>Today’s visits</small><div class="symbol">▣</div></div><h2>—</h2><span class="sub">Waiting for schedule API</span></div>
+            <div class="card"><div class="stat"><small>Pending requests</small><div class="symbol">▤</div></div><h2>—</h2><span class="sub">Waiting for booking API</span></div>
+            <div class="card"><div class="stat"><small>Consented patients</small><div class="symbol">♙</div></div><h2>—</h2><span class="sub">Waiting for consent API</span></div>
+            <div class="card"><div class="stat"><small>Unsigned notes</small><div class="symbol">✚</div></div><h2>—</h2><span class="sub">Waiting for encounter API</span></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>Today’s appointments</h3>
+                <span class="sub">Live slots will appear after M7</span>
+              </div>
+            </div>
+            <div id="todayStatus" class="status-banner empty">No visits loaded. The schedule API is a placeholder in M1.</div>
+            <div id="todayList"></div>
+          </div>
+        </section>
+
+        <section class="page" id="schedule">
+          <div class="welcome">
+            <div>
+              <div class="eyebrow">CARE SCHEDULE</div>
+              <h1>Schedule</h1>
+              <p>Confirm, complete, or decline appointment requests.</p>
+            </div>
+          </div>
+          <div id="scheduleStatus" class="status-banner empty">Schedule management is not implemented in M1.</div>
+        </section>
+
+        <section class="page" id="patients">
+          <div class="welcome">
+            <div>
+              <div class="eyebrow">CONSENTED CARE</div>
+              <h1>Patients</h1>
+              <p>Only patients with an active consent grant will appear here.</p>
+            </div>
+          </div>
+          <div id="patientsStatus" class="status-banner empty">Patient list waits for consent-aware APIs.</div>
+        </section>
+
+        <section class="page" id="records">
+          <div class="welcome">
+            <div>
+              <div class="eyebrow">CLINICAL DOCUMENTATION</div>
+              <h1>Clinical notes</h1>
+              <p>Create encounters and upload documents after the FHIR and storage milestones.</p>
+            </div>
+          </div>
+          <div id="notesStatus" class="status-banner empty">Clinical notes are not available in M1.</div>
+        </section>
+
+        <section class="page" id="audit">
+          <div class="welcome">
+            <div>
+              <div class="eyebrow">ACCOUNTABLE ACCESS</div>
+              <h1>Access log</h1>
+              <p>Your authenticated account actions recorded by the API.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div id="auditStatus" class="status-banner loading">Loading audit log…</div>
+            <div id="auditRows"></div>
+          </div>
+        </section>
+
+        <section class="page" id="profile">
+          <div class="welcome">
+            <div>
+              <div class="eyebrow">PRACTITIONER IDENTITY</div>
+              <h1>My profile</h1>
+              <p>Account details from secure authentication. Clinic location comes later with PostGIS.</p>
+            </div>
+          </div>
+          <div class="card profile-card">
+            <div class="profile-head">
+              <div class="avatar avatar-lg" id="profileAvatar">—</div>
+              <div>
+                <h3 class="profile-name" id="profileName">Practitioner</h3>
+                <span class="sub" id="profileMeta"></span>
+              </div>
+            </div>
+            <div class="grid profile-grid">
+              <div><span class="sub">Email</span><b class="profile-value" id="profileEmail">—</b></div>
+              <div><span class="sub">Role</span><b class="profile-value">Practitioner</b></div>
+              <div><span class="sub">Specialty</span><b class="profile-value">Not on file</b></div>
+              <div><span class="sub">Clinic</span><b class="profile-value">Not on file</b></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
