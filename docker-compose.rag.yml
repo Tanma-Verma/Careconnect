@@ -1,0 +1,91 @@
+services:
+  postgres:
+    # Compose 2.24.4+: restrict the original host binding in this overlay only.
+    ports: !override
+      - "127.0.0.1:5432:5432"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks: [default, rag_vectors]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://careconnect:careconnect@postgres:5432/careconnect}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      SESSION_HOURS: ${SESSION_HOURS:-12}
+      DOCUMENTS_DIR: /data/documents
+      FRONTEND_DIR: /app/frontend
+      CHROMA_HOST: chroma
+      CHROMA_PORT: "8000"
+      EMBEDDING_API_BASE_URL: ${EMBEDDING_API_BASE_URL:-}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-}
+      LLM_API_BASE_URL: ${LLM_API_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      PROVIDER_TIMEOUT_SECONDS: ${PROVIDER_TIMEOUT_SECONDS:-45}
+      MAX_COSINE_DISTANCE: ${MAX_COSINE_DISTANCE:-0.65}
+    volumes:
+      - careconnect_documents:/data/documents
+    depends_on:
+      postgres:
+        condition: service_healthy
+      chroma:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/health', timeout=5)"]
+      interval: 15s
+      timeout: 6s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    mem_limit: 768m
+    cpus: 2
+
+  chroma:
+    image: chromadb/chroma:1.5.9
+    # No published host ports. Only containers on this private network can connect.
+    networks: [rag_vectors]
+    volumes:
+      - careconnect_chroma:/data
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/8000'"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  tests:
+    profiles: [tools]
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: test
+    environment:
+      TEST_DATABASE_URL: postgresql://careconnect:careconnect@postgres:5432/careconnect
+      CHROMA_HOST: chroma
+      CHROMA_PORT: "8000"
+      FRONTEND_DIR: /app/frontend
+    networks: [default, rag_vectors]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      chroma:
+        condition: service_healthy
+
+  # backend also needs the existing default network for PostgreSQL.
+  # The original postgres/minio configuration and volumes are intentionally untouched.
+
+volumes:
+  careconnect_documents:
+  careconnect_chroma:
+
+networks:
+  rag_vectors:
+    internal: true

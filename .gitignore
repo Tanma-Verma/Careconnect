@@ -1,0 +1,39 @@
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python caches & build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+.rag-test-output/
+playwright-report/
+
+# Operating System files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE and Editors
+.idea/
+.vscode/
+*.swp
+*.tmp
+*~
+
+# Logs
+*.log
+
+# Dependencies
+node_modules/

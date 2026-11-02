@@ -575,6 +575,9 @@ button { cursor: pointer; }
 
 .modal-back.show { display: flex; }
 
+/* Registration must appear above the fixed login screen. */
+#registerModal { z-index: 30; }
+
 .modal {
   width: min(480px, 100%);
   background: white;
