@@ -21,12 +21,12 @@
       <h1 id="loginTitle">Welcome back</h1>
       <p>Sign in to access your connected health records.</p>
       <div class="auth-error" id="loginError" role="alert"></div>
-      <label for="loginId">Health ID or Email</label>
-      <input id="loginId" name="email" type="email" autocomplete="username" placeholder="Enter Health ID or email" required>
+      <label for="loginId">Email</label>
+      <input id="loginId" name="email" type="email" autocomplete="username" placeholder="Enter email" required>
       <label for="loginPass">Password</label>
       <input id="loginPass" name="password" type="password" autocomplete="current-password" placeholder="Enter password" required>
       <button class="primary" type="submit" id="loginSubmit">Sign in securely →</button>
-      <p class="demo-hint"><b>Stage 1</b><br>Authentication uses the Care Connect API. Create an account if you do not have one yet. Dashboard numbers stay empty until later medical APIs are implemented.</p>
+      <p class="demo-hint"><b>Private document assistant</b><br>Create a patient account, upload a PDF or TXT report, and ask questions with source citations. Use synthetic records for this demonstration.</p>
       <button class="secondary full-width mt-10" type="button" id="showRegister">Create patient account</button>
     </form>
   </div>
@@ -67,11 +67,13 @@
         <button type="button" data-page="records"><span class="ico" aria-hidden="true">▤</span> Medical records</button>
         <button type="button" data-page="appointments"><span class="ico" aria-hidden="true">▣</span> Appointments</button>
         <button type="button" data-page="doctors"><span class="ico" aria-hidden="true">♙</span> Find a doctor</button>
+        <button type="button" data-page="history"><span class="ico" aria-hidden="true">◷</span> Medical history</button>
         <button type="button" data-page="assistant"><span class="ico" aria-hidden="true">✧</span> AI health assistant</button>
       </nav>
       <div class="nav-label">ACCOUNT</div>
       <nav class="nav" aria-label="Account">
         <button type="button" data-page="consent"><span class="ico" aria-hidden="true">♧</span> Access & consent</button>
+        <button type="button" data-page="audit"><span class="ico" aria-hidden="true">▧</span> Audit history</button>
         <button type="button" data-page="profile"><span class="ico" aria-hidden="true">◎</span> My profile</button>
       </nav>
       <div class="side-bottom">
@@ -116,21 +118,21 @@
           </div>
           <div class="card health-banner">
             <div>
-              <div class="eyebrow banner-eyebrow">YOUR DIGITAL HEALTH ID</div>
+              <div class="eyebrow banner-eyebrow">YOUR CARECONNECT WORKSPACE</div>
               <h3>One identity. Your complete health story.</h3>
               <p>Your records, consultations and care — connected in one secure place.</p>
             </div>
             <div class="health-id">
-              <small>CARECONNECT ID</small>
+              <small>ACCOUNT REFERENCE</small>
               <b id="healthId">Not issued yet</b>
-              <button type="button" id="copyId">▣ &nbsp; Copy Health ID</button>
+              <button type="button" id="copyId">▣ &nbsp; Copy account reference</button>
             </div>
           </div>
           <div class="grid stats">
-            <div class="card"><div class="stat"><small>Medical records</small><div class="symbol" aria-hidden="true">▤</div></div><h2 id="statRecords">—</h2><span class="sub" id="statRecordsHint">Waiting for records API</span></div>
-            <div class="card"><div class="stat"><small>Consultations</small><div class="symbol" aria-hidden="true">♙</div></div><h2 id="statConsults">—</h2><span class="sub">Across connected providers</span></div>
-            <div class="card"><div class="stat"><small>Upcoming visits</small><div class="symbol" aria-hidden="true">▣</div></div><h2 id="statVisits">—</h2><span class="sub">Waiting for appointments API</span></div>
-            <div class="card"><div class="stat"><small>Active medications</small><div class="symbol" aria-hidden="true">✚</div></div><h2 id="statMeds">—</h2><span class="sub">Waiting for medication API</span></div>
+            <div class="card"><div class="stat"><small>Medical records</small><div class="symbol" aria-hidden="true">▤</div></div><h2 id="statRecords">—</h2><span class="sub" id="statRecordsHint">Your private documents</span></div>
+            <div class="card"><div class="stat"><small>Assigned doctors</small><div class="symbol" aria-hidden="true">♙</div></div><h2 id="statConsults">—</h2><span class="sub">Your care team</span></div>
+            <div class="card"><div class="stat"><small>Upcoming visits</small><div class="symbol" aria-hidden="true">▣</div></div><h2 id="statVisits">—</h2><span class="sub">Requested or confirmed</span></div>
+            <div class="card"><div class="stat"><small>Indexed reports</small><div class="symbol" aria-hidden="true">✚</div></div><h2 id="statMeds">—</h2><span class="sub">Ready for evidence-based questions</span></div>
           </div>
           <div class="grid layout">
             <div>
@@ -142,22 +144,22 @@
                   </div>
                   <button class="link" type="button" data-go="records">View all →</button>
                 </div>
-                <div id="recentStatus" class="status-banner empty">No records yet. Uploads arrive in a later milestone.</div>
+                <div id="recentStatus" class="status-banner empty">Loading your documents…</div>
                 <div class="record-list" id="recentRecords"></div>
               </div>
               <div class="card mt-17">
                 <div class="card-head">
                   <div>
                     <h3>Health snapshot</h3>
-                    <span class="sub">Latest recorded vitals</span>
+                    <span class="sub">Latest documented report observations</span>
                   </div>
                   <span class="tag blue" id="vitalsTag">No readings</span>
                 </div>
                 <div class="grid vitals">
                   <div class="vital"><small>Blood pressure</small><b id="vitalBp">—</b><span>mmHg</span></div>
-                  <div class="vital"><small>Heart rate</small><b id="vitalHr">—</b><span>Resting</span></div>
-                  <div class="vital"><small>Weight</small><b id="vitalWeight">—</b><span>Last recorded</span></div>
-                  <div class="vital"><small>SpO₂</small><b id="vitalSpo2">—</b><span>Oxygen saturation</span></div>
+                  <div class="vital"><small>Fasting glucose</small><b id="vitalHr">—</b><span>mg/dL</span></div>
+                  <div class="vital"><small>Hemoglobin</small><b id="vitalWeight">—</b><span>g/dL</span></div>
+                  <div class="vital"><small>HbA1c</small><b id="vitalSpo2">—</b><span>%</span></div>
                 </div>
               </div>
             </div>
@@ -177,12 +179,12 @@
               <div class="card mt-17">
                 <div class="card-head">
                   <h3>AI health assistant</h3>
-                  <span class="tag blue">API placeholder</span>
+                  <span class="tag blue">Document assistant</span>
                 </div>
                 <div class="stack-card">
                   <div class="spark" aria-hidden="true">✧</div>
                   <b class="stack-title">Your health context, in one conversation.</b>
-                  <p class="sub">Ask questions about your records after the RAG service is connected.</p>
+                  <p class="sub">Ask questions about your uploaded documents and inspect the supporting sources.</p>
                   <button class="primary" type="button" data-go="assistant">Open assistant →</button>
                 </div>
               </div>
@@ -201,17 +203,16 @@
           </div>
           <div class="toolbar">
             <label class="sr-only" for="recordSearch">Search records</label>
-            <input class="search" id="recordSearch" placeholder="Search records, hospital or diagnosis…">
+            <input class="search" id="recordSearch" placeholder="Search report filenames…">
             <label class="sr-only" for="recordType">Record type</label>
             <select class="search" id="recordType">
               <option value="all">All record types</option>
-              <option>Prescription</option>
-              <option>Lab report</option>
-              <option>Consultation</option>
-              <option>Imaging</option>
+              <option value="application/pdf">PDF</option>
+              <option value="text/plain">TXT</option>
             </select>
           </div>
-          <div id="recordsStatus" class="status-banner empty">Loading is not simulated — this list stays empty until the records API is implemented.</div>
+          <button class="secondary" type="button" id="refreshRecords">Refresh documents</button>
+          <div id="recordsStatus" class="status-banner empty">Upload a PDF or TXT report to begin.</div>
           <div class="card table-wrap">
             <table class="table">
               <thead>
@@ -250,26 +251,24 @@
             <div>
               <div class="eyebrow">CARE, WITH THE RIGHT EXPERT</div>
               <h1>Find a doctor</h1>
-              <p>Discover specialists and explore care options near you.</p>
+              <p>Browse the directory or filter to your assigned care team.</p>
             </div>
           </div>
           <div class="toolbar">
             <label class="sr-only" for="doctorSearch">Search doctors</label>
             <input class="search" id="doctorSearch" placeholder="Search doctor or specialization…">
-            <label class="sr-only" for="doctorLocation">Location</label>
+            <label class="sr-only" for="doctorLocation">Department</label>
             <select class="search" id="doctorLocation">
-              <option value="">All locations</option>
-              <option>Raipur</option>
-              <option>Delhi</option>
+              <option value="">All departments</option>
             </select>
             <label class="sr-only" for="doctorSpecialty">Speciality</label>
             <select class="search" id="doctorSpecialty">
               <option value="">All specialities</option>
-              <option>Orthopedics</option>
-              <option>Cardiology</option>
+
             </select>
           </div>
-          <div id="doctorsStatus" class="status-banner empty">Nearby search ships with PostGIS in a later milestone.</div>
+          <label class="sub"><input type="checkbox" id="assignedOnly"> My assigned doctors only</label>
+          <div id="doctorsStatus" class="status-banner empty">Loading doctor directory…</div>
           <div class="grid doctor-grid" id="doctorGrid"></div>
         </section>
 
@@ -280,7 +279,7 @@
               <h1>AI health assistant</h1>
               <p>Understand your health information with help from an AI-guided experience.</p>
             </div>
-            <span class="tag blue">Not connected</span>
+            <span class="tag blue" id="assistantStatus">Upload a document</span>
           </div>
           <div class="assistant">
             <div class="card chatbox">
@@ -289,29 +288,27 @@
                   <h3>CareConnect Assistant</h3>
                   <span class="sub" id="chatContext">Signed-in patient context</span>
                 </div>
-                <span class="tag">Offline until RAG</span>
+                <span class="tag">Source-grounded answers</span>
               </div>
               <div class="chatmessages" id="chatmessages" aria-live="polite"></div>
               <form class="chatinput" id="chatForm">
                 <label class="sr-only" for="chatInput">Message</label>
-                <input id="chatInput" placeholder="Ask about your health records…">
+                <input id="chatInput" maxlength="4000" placeholder="Ask about your health records…">
                 <button class="primary" type="submit">Send ↑</button>
               </form>
             </div>
             <div>
               <div class="card">
                 <h3 class="card-title-sm">Your connected context</h3>
-                <div class="consent-row"><span>Medical history</span><span class="tag blue">No data</span></div>
-                <div class="consent-row"><span>Current medicines</span><span class="tag blue">No data</span></div>
-                <div class="consent-row"><span>Recent vitals</span><span class="tag blue">No data</span></div>
-                <div class="consent-row"><span>Allergies</span><span class="tag blue">No data</span></div>
-                <div class="notice">The assistant will retrieve only your authorized records after the RAG milestone. Scripted demo answers have been removed.</div>
+                <div class="consent-row"><span>Indexed documents</span><span class="tag blue" id="chatReadyCount">0</span></div>
+                <div class="consent-row"><span>Clinical notes</span><span class="tag">Structured history only</span></div>
+                <div class="notice">Only your READY documents are searched, including indexed synthetic reports. Clinical notes and structured history are not AI sources. Expand citations to inspect the evidence. The assistant can make mistakes.</div>
               </div>
               <div class="card mt-17">
                 <h3 class="card-title-sm">Try asking</h3>
-                <button class="link link-block" type="button" data-ask="Can you summarize my recent medical records?">Summarize my recent records</button>
-                <button class="link link-block" type="button" data-ask="Explain my blood pressure reading.">Explain my blood pressure</button>
-                <button class="link link-block" type="button" data-ask="What should I ask my doctor at my next visit?">Prepare for my next visit</button>
+                <button class="link link-block" type="button" data-ask="What was my latest blood pressure? Cite the dated report.">Latest blood pressure</button>
+                <button class="link link-block" type="button" data-ask="How has my fasting blood glucose changed over time? Give the documented dates and units.">Compare blood glucose over time</button>
+                <button class="link link-block" type="button" data-ask="Which report contains my hemoglobin result? Give the documented value and units.">Find my hemoglobin report</button>
               </div>
             </div>
           </div>
@@ -330,20 +327,31 @@
             <div class="card-head">
               <div>
                 <h3>Active access permissions</h3>
-                <span class="sub">Grants will appear after the consent API</span>
+                <span class="sub">Consent applies only with an active doctor-patient assignment. Revoking access affects subsequent requests.</span>
               </div>
             </div>
             <div id="consentStatus" class="status-banner empty">No provider permissions yet.</div>
             <div id="consentRows"></div>
           </div>
-          <div class="card mt-17">
+        </section>
+
+        <section class="page" id="audit" aria-label="Audit history">
+          <div class="welcome"><div><div class="eyebrow">ACCOUNT ACTIVITY</div><h1>Audit history</h1><p>Your recorded account operations.</p></div><button class="secondary" type="button" id="refreshAudit">Refresh</button></div>
+          <div class="card">
             <div class="card-head">
-              <h3>Recent access history</h3>
+              <h3>Recent account history</h3>
               <span class="tag blue">Account audit</span>
             </div>
             <div id="auditStatus" class="status-banner loading">Loading audit log…</div>
             <div id="auditRows"></div>
           </div>
+        </section>
+
+        <section class="page" id="history" aria-label="Medical history">
+          <div class="welcome"><div><div class="eyebrow">YOUR LONGITUDINAL RECORD</div><h1>Medical history</h1><p>Report measurements, documented history and clinical notes. Notes are not included in AI retrieval.</p></div><button class="secondary" type="button" id="refreshHistory">Refresh</button></div>
+          <div id="historyStatus" class="status-banner loading">Loading medical history…</div>
+          <div class="card"><h3>Clinical timeline</h3><div id="historyRows"></div></div>
+          <div class="card mt-17 table-wrap"><h3>Documented observations</h3><table class="table"><thead><tr><th>DATE</th><th>MEASUREMENT</th><th>VALUE</th><th>REFERENCE RANGE</th><th>SOURCE</th></tr></thead><tbody id="observationRows"></tbody></table></div>
         </section>
 
         <section class="page" id="profile" aria-label="My profile">
@@ -353,7 +361,7 @@
               <h1>My profile</h1>
               <p>Review your personal information and emergency contact.</p>
             </div>
-            <button class="primary" type="button" id="editProfileBtn">Edit profile</button>
+            <span class="tag" id="demoBadge">Patient profile</span>
           </div>
           <div class="card profile-card">
             <div class="profile-head">
@@ -366,10 +374,10 @@
             <div class="grid profile-grid">
               <div><span class="sub">Email</span><b class="profile-value" id="profileEmail">—</b></div>
               <div><span class="sub">Role</span><b class="profile-value">Patient</b></div>
-              <div><span class="sub">Date of birth</span><b class="profile-value">Not on file</b></div>
-              <div><span class="sub">Phone</span><b class="profile-value">Not on file</b></div>
-              <div><span class="sub">Address</span><b class="profile-value">Not on file</b></div>
-              <div><span class="sub">Emergency contact</span><b class="profile-value">Not on file</b></div>
+              <div><span class="sub">Date of birth</span><b class="profile-value" id="profileDob">Not on file</b></div>
+              <div><span class="sub">Recorded sex</span><b class="profile-value" id="profileSex">Not on file</b></div>
+              <div><span class="sub">Demographics</span><b class="profile-value" id="profileDemographics">Not on file</b></div>
+              <div><span class="sub">Account reference</span><b class="profile-value" id="profileId">—</b></div>
             </div>
           </div>
         </section>
@@ -380,7 +388,7 @@
   <div class="modal-back" id="modal" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <h3 id="modalTitle">Add record</h3>
-      <p id="modalDesc">This action waits for a later API.</p>
+      <p id="modalDesc">Choose the details below.</p>
       <div id="modalFields"></div>
       <div class="modal-actions">
         <button class="secondary" type="button" id="modalCancel">Cancel</button>

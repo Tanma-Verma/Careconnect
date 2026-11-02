@@ -1,0 +1,14 @@
+SYNTHETIC HACKATHON DOCUMENT — NOT A REAL PATIENT
+
+Patient: Demo Alpha
+Visit date: 1 November 2026
+Document type: fictional outpatient visit summary
+
+Recorded measurements:
+- Blood pressure: 122/80 mmHg
+- Pulse: 72 beats per minute
+- Oxygen saturation: 98%
+
+The fictional clinician recommended reviewing these measurements at a follow-up
+visit in two weeks. No diagnosis is documented in this report. No medication is
+prescribed in this report. These values are demonstration data, not medical advice.

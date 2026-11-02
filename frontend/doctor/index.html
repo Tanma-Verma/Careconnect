@@ -26,28 +26,7 @@
       <label for="loginPass">Password</label>
       <input id="loginPass" type="password" autocomplete="current-password" placeholder="Enter password" required>
       <button class="primary" type="submit" id="loginSubmit">Sign in securely →</button>
-      <p class="demo-hint"><b>Stage 1</b><br>Uses the same secure API as the patient portal. Patient charts, uploads, and bookings are placeholders until later milestones.</p>
-      <button class="secondary full-width mt-10" type="button" id="showRegister">Create practitioner account</button>
-    </form>
-  </div>
-
-  <div class="modal-back" id="registerModal" hidden>
-    <form class="modal" id="registerForm" novalidate>
-      <h3>Create practitioner account</h3>
-      <p>Development-only self-registration. Passwords must be at least 12 characters.</p>
-      <div class="auth-error" id="registerError" role="alert"></div>
-      <div class="field">
-        <label for="regEmail">Work email</label>
-        <input id="regEmail" type="email" required>
-      </div>
-      <div class="field">
-        <label for="regPassword">Password</label>
-        <input id="regPassword" type="password" minlength="12" required>
-      </div>
-      <div class="modal-actions">
-        <button class="secondary" type="button" id="cancelRegister">Cancel</button>
-        <button class="primary" type="submit">Create account</button>
-      </div>
+      <p class="demo-hint">Practitioner accounts are provisioned by the local administrator. Medical access requires an assignment and current patient consent.</p>
     </form>
   </div>
 
@@ -63,10 +42,13 @@
       </div>
       <div class="nav-label">WORKSPACE</div>
       <nav class="nav" aria-label="Workspace">
-        <button type="button" class="active" data-page="dashboard" aria-current="page"><span class="ico" aria-hidden="true">▦</span> Today</button>
+        <button type="button" class="active" data-page="dashboard" aria-current="page"><span class="ico" aria-hidden="true">▦</span> Dashboard</button>
         <button type="button" data-page="schedule"><span class="ico" aria-hidden="true">▣</span> Schedule</button>
         <button type="button" data-page="patients"><span class="ico" aria-hidden="true">♙</span> Patients</button>
-        <button type="button" data-page="records"><span class="ico" aria-hidden="true">▤</span> Clinical notes</button>
+        <button type="button" data-page="history"><span class="ico" aria-hidden="true">▤</span> Medical history</button>
+        <button type="button" data-page="records"><span class="ico" aria-hidden="true">✚</span> Clinical notes</button>
+        <button type="button" data-page="reports"><span class="ico" aria-hidden="true">▤</span> Medical reports</button>
+        <button type="button" data-page="assistant"><span class="ico" aria-hidden="true">✧</span> AI assistant</button>
       </nav>
       <div class="nav-label">ACCOUNT</div>
       <nav class="nav" aria-label="Account">
@@ -76,8 +58,8 @@
       <div class="side-bottom">
         <div class="help">
           <b>Need help?</b>
-          <p>Clinic operations support will connect in a later release.</p>
-          <button type="button" id="supportBtn">Visit support centre</button>
+          <p>Select a consented patient before opening a chart or asking the assistant.</p>
+          <button type="button" id="supportBtn">Access guidance</button>
         </div>
         <div class="profile-mini">
           <div class="avatar" id="miniAvatar">—</div>
@@ -102,103 +84,53 @@
         </div>
       </header>
       <div class="content">
+        <div class="card">
+          <div class="field"><label for="selectedPatient">Patient chart context</label><select id="selectedPatient"><option value="">Choose an assigned, consented patient</option></select></div>
+          <p class="sub" id="patientContext">No patient selected. The assistant never searches all patients.</p>
+        </div>
         <section class="page active" id="dashboard">
-          <div class="welcome">
-            <div>
-              <div class="eyebrow">YOUR CLINIC DAY</div>
-              <h1 id="welcomeTitle">Welcome</h1>
-              <p>Review today’s schedule. Patient charts stay closed until consent APIs are live.</p>
-            </div>
-            <div class="date" id="welcomeDate"></div>
-          </div>
+          <div class="welcome"><div><div class="eyebrow">YOUR CLINIC DAY</div><h1 id="welcomeTitle">Welcome</h1><p>Assigned patients, appointments and authorized reports from your workspace.</p></div><div class="date" id="welcomeDate"></div></div>
+          <div id="dashboardStatus" class="status-banner loading" role="status">Loading dashboard…</div>
           <div class="grid stats">
-            <div class="card"><div class="stat"><small>Today’s visits</small><div class="symbol">▣</div></div><h2>—</h2><span class="sub">Waiting for schedule API</span></div>
-            <div class="card"><div class="stat"><small>Pending requests</small><div class="symbol">▤</div></div><h2>—</h2><span class="sub">Waiting for booking API</span></div>
-            <div class="card"><div class="stat"><small>Consented patients</small><div class="symbol">♙</div></div><h2>—</h2><span class="sub">Waiting for consent API</span></div>
-            <div class="card"><div class="stat"><small>Unsigned notes</small><div class="symbol">✚</div></div><h2>—</h2><span class="sub">Waiting for encounter API</span></div>
+            <div class="card"><div class="stat"><small>Assigned &amp; consented patients</small><div class="symbol">♙</div></div><h2 id="statPatients">—</h2><span class="sub">Current record access</span></div>
+            <div class="card"><div class="stat"><small>Today's appointments</small><div class="symbol">▣</div></div><h2 id="statToday">—</h2><span class="sub">Database schedule</span></div>
+            <div class="card"><div class="stat"><small>Upcoming appointments</small><div class="symbol">▣</div></div><h2 id="statUpcoming">—</h2><span class="sub">Active future visits</span></div>
+            <div class="card"><div class="stat"><small>Pending requests</small><div class="symbol">✚</div></div><h2 id="statPending">—</h2><span class="sub">Appointment requests</span></div>
           </div>
-          <div class="card">
-            <div class="card-head">
-              <div>
-                <h3>Today’s appointments</h3>
-                <span class="sub">Live slots will appear after M7</span>
-              </div>
-            </div>
-            <div id="todayStatus" class="status-banner empty">No visits loaded. The schedule API is a placeholder in M1.</div>
-            <div id="todayList"></div>
-          </div>
+          <div class="grid layout"><div class="card"><div class="card-head"><h3>Appointment overview</h3></div><div id="todayList"></div></div><div class="card"><div class="card-head"><h3>Recent authorized reports</h3></div><div id="recentReports"></div></div></div>
         </section>
-
         <section class="page" id="schedule">
-          <div class="welcome">
-            <div>
-              <div class="eyebrow">CARE SCHEDULE</div>
-              <h1>Schedule</h1>
-              <p>Confirm, complete, or decline appointment requests.</p>
-            </div>
-          </div>
-          <div id="scheduleStatus" class="status-banner empty">Schedule management is not implemented in M1.</div>
+          <div class="welcome"><div><div class="eyebrow">CARE SCHEDULE</div><h1>Appointments</h1><p>Review your appointments and permitted status changes.</p></div><button class="secondary" id="refreshAppointments" type="button">Refresh</button></div>
+          <div id="scheduleStatus" class="status-banner empty" role="status"></div><div class="card table-wrap"><table class="table"><thead><tr><th>PATIENT</th><th>DATE / TIME</th><th>REASON</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id="appointmentRows"></tbody></table></div>
         </section>
-
         <section class="page" id="patients">
-          <div class="welcome">
-            <div>
-              <div class="eyebrow">CONSENTED CARE</div>
-              <h1>Patients</h1>
-              <p>Only patients with an active consent grant will appear here.</p>
-            </div>
-          </div>
-          <div id="patientsStatus" class="status-banner empty">Patient list waits for consent-aware APIs.</div>
+          <div class="welcome"><div><div class="eyebrow">CONSENTED CARE</div><h1>My patients</h1><p>Only assigned patients with current record-sharing consent appear.</p></div></div>
+          <form id="patientSearchForm" class="toolbar"><label class="sr-only" for="patientSearch">Search authorized patients</label><input class="search" id="patientSearch" placeholder="Search authorized patients by name"><button class="secondary" type="submit">Search</button><button class="secondary" type="button" id="refreshPatients">Refresh access</button></form>
+          <div id="patientsStatus" class="status-banner empty" role="status"></div><div class="card table-wrap"><table class="table"><thead><tr><th>PATIENT</th><th>DATE OF BIRTH</th><th>ACCESS SCOPE</th><th>CHART</th></tr></thead><tbody id="patientsRows"></tbody></table></div>
         </section>
-
+        <section class="page" id="history">
+          <div class="welcome"><div><div class="eyebrow">PATIENT CHART</div><h1>Medical history</h1><p>Chronological observations and clinical history for the selected patient.</p></div><button class="secondary" type="button" id="refreshHistory">Refresh</button></div>
+          <div id="historyStatus" class="status-banner empty" role="status">Select a patient.</div><div class="card" id="patientSummary"></div><div class="card" id="historyRows"></div>
+        </section>
         <section class="page" id="records">
-          <div class="welcome">
-            <div>
-              <div class="eyebrow">CLINICAL DOCUMENTATION</div>
-              <h1>Clinical notes</h1>
-              <p>Create encounters and upload documents after the FHIR and storage milestones.</p>
-            </div>
-          </div>
-          <div id="notesStatus" class="status-banner empty">Clinical notes are not available in M1.</div>
+          <div class="welcome"><div><div class="eyebrow">CLINICAL DOCUMENTATION</div><h1>Clinical notes</h1><p>Structured notes require clinical consent. Notes are not currently indexed by the AI assistant.</p></div></div>
+          <div id="notesStatus" class="status-banner empty" role="status">Select a patient.</div>
+          <form class="card" id="noteForm"><div class="field"><label for="noteAppointment">Related appointment (optional)</label><select id="noteAppointment"><option value="">No linked appointment</option></select></div><div class="field"><label for="noteContent">Clinical note</label><textarea id="noteContent" rows="5" maxlength="10000" required placeholder="Record observations and follow-up for the selected patient"></textarea></div><button class="primary" type="submit" id="saveNote">Save clinical note</button></form>
+          <div class="card" id="notesRows"></div>
         </section>
-
+        <section class="page" id="reports">
+          <div class="welcome"><div><div class="eyebrow">AUTHORIZED DOCUMENTS</div><h1>Medical reports</h1><p>Source links are checked again by the server when opened.</p></div><button class="secondary" type="button" id="refreshReports">Refresh</button></div>
+          <div id="reportsStatus" class="status-banner empty" role="status">Select a patient.</div><div class="card table-wrap"><table class="table"><thead><tr><th>REPORT</th><th>UPLOADED</th><th>INDEXING</th><th>SOURCE</th></tr></thead><tbody id="reportsRows"></tbody></table></div>
+        </section>
+        <section class="page" id="assistant">
+          <div class="welcome"><div><div class="eyebrow">EVIDENCE-GROUNDED SUPPORT</div><h1>Patient document assistant</h1><p>Answers use only this patient's authorized indexed reports. Review sources and use clinical judgement.</p></div></div>
+          <div class="card chatbox"><div class="card-head"><div><h3>CareConnect Assistant</h3><span class="sub" id="chatContext">Select a patient to begin.</span></div></div><div class="chatmessages" id="chatmessages" aria-live="polite"></div><form class="chatinput" id="chatForm"><label class="sr-only" for="chatInput">Question about the selected patient</label><input id="chatInput" maxlength="4000" placeholder="Ask about the selected patient's reports" required><button class="primary" type="submit" id="chatSend">Send ↑</button></form></div>
+        </section>
         <section class="page" id="audit">
-          <div class="welcome">
-            <div>
-              <div class="eyebrow">ACCOUNTABLE ACCESS</div>
-              <h1>Access log</h1>
-              <p>Your authenticated account actions recorded by the API.</p>
-            </div>
-          </div>
-          <div class="card">
-            <div id="auditStatus" class="status-banner loading">Loading audit log…</div>
-            <div id="auditRows"></div>
-          </div>
+          <div class="welcome"><div><div class="eyebrow">ACCOUNTABLE ACCESS</div><h1>Audit history</h1><p>Your authenticated account actions recorded by the API.</p></div><button class="secondary" id="refreshAudit" type="button">Refresh</button></div><div class="card"><div id="auditStatus" class="status-banner loading" role="status">Loading…</div><div id="auditRows"></div></div>
         </section>
-
         <section class="page" id="profile">
-          <div class="welcome">
-            <div>
-              <div class="eyebrow">PRACTITIONER IDENTITY</div>
-              <h1>My profile</h1>
-              <p>Account details from secure authentication. Clinic location comes later with PostGIS.</p>
-            </div>
-          </div>
-          <div class="card profile-card">
-            <div class="profile-head">
-              <div class="avatar avatar-lg" id="profileAvatar">—</div>
-              <div>
-                <h3 class="profile-name" id="profileName">Practitioner</h3>
-                <span class="sub" id="profileMeta"></span>
-              </div>
-            </div>
-            <div class="grid profile-grid">
-              <div><span class="sub">Email</span><b class="profile-value" id="profileEmail">—</b></div>
-              <div><span class="sub">Role</span><b class="profile-value">Practitioner</b></div>
-              <div><span class="sub">Specialty</span><b class="profile-value">Not on file</b></div>
-              <div><span class="sub">Clinic</span><b class="profile-value">Not on file</b></div>
-            </div>
-          </div>
+          <div class="welcome"><div><div class="eyebrow">PRACTITIONER IDENTITY</div><h1>My profile</h1><p>Provisioned practitioner profile from PostgreSQL.</p></div></div><div id="profileStatus" class="status-banner empty" role="status"></div><div class="card profile-card"><div class="profile-head"><div class="avatar avatar-lg" id="profileAvatar">—</div><div><h3 id="profileName" class="profile-name"></h3><span class="sub" id="profileMeta"></span></div></div><div class="grid profile-grid" id="profileFields"></div></div>
         </section>
       </div>
     </main>
